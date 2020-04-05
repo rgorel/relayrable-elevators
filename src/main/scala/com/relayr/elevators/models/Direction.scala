@@ -1,8 +1,8 @@
 package com.relayr.elevators.models
 
-sealed abstract class Direction
+sealed abstract case class Direction(sign: Int)
 
 object Direction {
-  final case object Up extends Direction
-  final case object Down extends Direction
+  final object Up extends Direction(1)
+  final object Down extends Direction(-1)
 }
