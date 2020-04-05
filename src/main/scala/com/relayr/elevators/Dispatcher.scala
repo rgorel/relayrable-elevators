@@ -5,6 +5,8 @@ import com.relayr.elevators.models._
 final case class Dispatcher(state: State) {
   def pickup(pickupRequest: PickupRequest): State = ???
 
+  def newDestination(elevatorId: Int, targetFloor: Int): State = ???
+
   def step(): State = ???
 }
 

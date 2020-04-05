@@ -21,8 +21,8 @@ object Controller {
       | Here's what you can do:
       |   s
       |     request status of all evelators
-      |   u [ID]
-      |     request status from the elevator with ID [ID]. Space can be omitted. Examples: s 1, s10
+      |   d [ID] [FLOOR]
+      |     request elevator with ID [ID] to go to the [FLOOR]. First space can be omitted. Examples: d 0 10, d3 1
       |   p [FLOOR] [DIRECTION]
       |     pickup from [FLOOR] and go to [DIRECTION]. [DIRECTION] is either `u` (up) or `d` (down).
       |     Spaces can be omitted. Examples: p 10 u, p5d
@@ -57,10 +57,8 @@ object Controller {
         repl(state)
       }
 
-      case Some(Action.Update(elevatorId: Int)) => {
-        Printer(state).update(elevatorId)
-        repl(state)
-      }
+      case Some(Action.Destination(elevatorId: Int, targetFloor: Int)) =>
+        repl(Dispatcher(state).newDestination(elevatorId, targetFloor))
 
       case Some(Action.Pickup(pickupRequest: PickupRequest)) =>
         repl(Dispatcher(state).pickup(pickupRequest))
@@ -82,7 +80,7 @@ sealed abstract class Action
 
 private object Action {
   final case object Status extends Action
-  final case class Update(elevatorId: Int) extends Action
+  final case class Destination(elevatorId: Int, targetFloor: Int) extends Action
 
   final case class Pickup(
     pickupRequest: PickupRequest
@@ -91,12 +89,14 @@ private object Action {
   final case object Step extends Action
   final case object Quit extends Action
 
-  private val UpdatePattern = """^u\s*(\d+)""".r
+  private val DestinationPattern = """^d\s*(\d+)\s+(\d+)""".r
   private val PickupPattern = """^p\s*(\d+)\s*(u|d)""".r
 
   def apply(input: String): Option[Action] = input match {
     case "s" => Some(Status)
-    case UpdatePattern(elevatorId: String) => Some(Update(elevatorId.toInt))
+
+    case DestinationPattern(elevatorId: String, targetFloor: String) =>
+      Some(Destination(elevatorId.toInt, targetFloor.toInt))
 
     case PickupPattern(pickupFloor: String, direction: String) =>
       Some(
