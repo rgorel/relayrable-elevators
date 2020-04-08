@@ -1,6 +1,6 @@
 # Relayrable Elevator Simulation
 
-Simulates multiple elevators serving the pickup requests and scheduling multiple destination.
+Simulates multiple elevators serving pickup requests and scheduling multiple destination floors.
 
 ## Algorithm
 
@@ -50,7 +50,7 @@ The `Dispatcher` interface offers the following methods to operate on a `State`:
 * `Stopped` - represents a stopped elevator and exposes `currentFloor: Int` in its interface
 * `Moving` - represents a moving elevator; exposes:
   * `currentFloor: Int`, 
-  * `targetFloor: Int` that represents the destination floor in the direction where an elevator is currently moving
+  * `targetFloor: Int` that represents the destination floor in the direction where an elevator is currently moving; defined as _turning point_ above
   * `nextFloor: Option[Int]` - represents the destination floor in the opposite direction of the current movement; the elevator should move in the direction of that floor after it reaches its current destination. If `None`, elevator would stop after reaching its current destination.
 
 
@@ -73,7 +73,7 @@ At the very start of the simulation it asks how many elevators the user would wa
 
 The following commands are offered in REPL:
 * schedule a pickup request
-* schedule the new destination floor for a particular elevator
+* schedule a new destination floor for a particular elevator
 * execute the next step in the simulation
 * print the current status of the system
 * exit the REPL
