@@ -56,6 +56,15 @@ The `Dispatcher` interface offers the following methods to operate on a `State`:
 
 All mentioned data structures are immutable.
 
+## Purposedly ignored
+
+The following is considered to be not as important for the exercise and is left out:
+* counting how many people are currently in the elevator
+* managing the evevator's capacity (how many people it would fit in)
+* managing the status of the doors (open/closed)
+* keeping track of which elevator has served which pickup requests
+
+
 ## UI
 
 In order to ease the manual testing of the system, a simple CLI has been developed. After starting the application, the user will be offered to enter the available commands in its internal REPL. Each command will result in an updated state of the simulation that would be passed to the next iteration of the REPL.
