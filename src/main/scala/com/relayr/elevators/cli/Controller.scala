@@ -2,7 +2,7 @@ package com.relayr.elevators.cli
 
 import com.relayr.elevators.models.{PickupRequest, State}
 import com.relayr.elevators.MaxElevators
-import com.relayr.elevators.services.Dispatcher
+import com.relayr.elevators.services.{Dispatcher, ElevatorNotFound}
 
 import scala.annotation.tailrec
 import scala.io.StdIn
@@ -60,10 +60,22 @@ object Controller {
       }
 
       case Some(Action.Destination(elevatorId: Int, targetFloor: Int)) =>
-        repl(Dispatcher(state).newDestination(elevatorId, targetFloor))
+        Dispatcher(state).newDestination(elevatorId, targetFloor) match {
+          case Left(error: ElevatorNotFound) => {
+            println(error.getMessage)
+            repl(state)
+          }
+          case Right(state) => repl(state)
+        }
 
       case Some(Action.Pickup(pickupRequest: PickupRequest)) =>
-        repl(Dispatcher(state).pickup(pickupRequest))
+        Dispatcher(state).pickup(pickupRequest) match {
+          case Left(error: ElevatorNotFound) => {
+            println(error.getMessage)
+            repl(state)
+          }
+          case Right(state) => repl(state)
+        }
 
       case Some(Action.Step) => {
         val nextState = Dispatcher(state).step()

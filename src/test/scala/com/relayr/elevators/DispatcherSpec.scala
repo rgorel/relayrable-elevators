@@ -1,7 +1,7 @@
 package com.relayr.elevators
 
 import com.relayr.elevators.models._
-import com.relayr.elevators.services.{Dispatcher, Elevator}
+import com.relayr.elevators.services.{Dispatcher, Elevator, ElevatorNotFound}
 import org.scalatest.funspec.AnyFunSpec
 
 import scala.collection.immutable.Queue
@@ -15,8 +15,13 @@ class DispatcherSpec extends AnyFunSpec {
     )
   )
 
+  def getState(result: Either[ElevatorNotFound, State]): State = result match {
+    case Left(exception: Exception) => throw exception
+    case Right(state) => state
+  }
+
   describe("scheduling a new destination for an elevator") {
-    val updated = Dispatcher(state).newDestination(0, 2)
+    val updated = getState(Dispatcher(state).newDestination(0, 2))
 
     it("schedules the destination") {
       val elevatorState = updated.elevators(0).asInstanceOf[ElevatorState.Moving]
@@ -42,7 +47,7 @@ class DispatcherSpec extends AnyFunSpec {
       PickupRequest(6, Direction.Down),
       PickupRequest(1, Direction.Down)
     ).foldLeft(state)(
-      (state, pickupRequest) => Dispatcher(state).pickup(pickupRequest)
+      (state, pickupRequest) => getState(Dispatcher(state).pickup(pickupRequest))
     )
 
     it("tells corresponding elevators to move towards pickup requests") {
@@ -67,7 +72,7 @@ class DispatcherSpec extends AnyFunSpec {
     )
 
     describe("and there's a pickup request in the other direction") {
-      val updated = Dispatcher(state).pickup(PickupRequest(9, Direction.Up))
+      val updated = getState(Dispatcher(state).pickup(PickupRequest(9, Direction.Up)))
 
       it("chooses an elevator with the closest turning point") {
         val elevators = updated.elevators.asInstanceOf[IndexedSeq[ElevatorState.Moving]]
@@ -82,7 +87,7 @@ class DispatcherSpec extends AnyFunSpec {
     }
 
     describe("and there's a pickup request in the same direction") {
-      val updated = Dispatcher(state).pickup(PickupRequest(5, Direction.Down))
+      val updated = getState(Dispatcher(state).pickup(PickupRequest(5, Direction.Down)))
 
       it("chooses an elevator that is going to continue travelling in the same direction after pickup") {
         val elevators = updated.elevators.asInstanceOf[IndexedSeq[ElevatorState.Moving]]

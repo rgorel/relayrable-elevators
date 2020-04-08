@@ -3,16 +3,23 @@ package com.relayr.elevators.services
 import com.relayr.elevators.StartFloor
 import com.relayr.elevators.models._
 
+final case class ElevatorNotFound(id: Int) extends Exception(s"Elevator #$id does not exist")
+
 final case class Dispatcher(state: State) {
-  def pickup(pickupRequest: PickupRequest): State =
+  def pickup(pickupRequest: PickupRequest): Either[ElevatorNotFound, State] =
     newDestination(findElevatorForPickup(pickupRequest), pickupRequest.pickupFloor)
-      .addPickupRequest(pickupRequest)
+      .map(_.addPickupRequest(pickupRequest))
 
-  def newDestination(elevatorId: Int, targetFloor: Int): State = {
-    val elevator = Elevator(state.elevators(elevatorId))
+  def newDestination(elevatorId: Int, targetFloor: Int): Either[ElevatorNotFound, State] =
+    if (state.elevators.isDefinedAt(elevatorId)) {
+      val elevator = Elevator(state.elevators(elevatorId))
 
-    state.copy(elevators = state.elevators.updated(elevatorId, elevator.schedule(targetFloor)))
-  }
+      Right(
+        state.copy(elevators = state.elevators.updated(elevatorId, elevator.schedule(targetFloor)))
+      )
+    }
+    else
+      Left(ElevatorNotFound(elevatorId))
 
   def step(): State =
     State(
