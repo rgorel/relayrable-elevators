@@ -7,7 +7,7 @@ ThisBuild / organizationName := "relayr"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "Relayrable Elevators",
+    name := "relayrable-elevators",
     libraryDependencies += scalaTest % Test
   )
 

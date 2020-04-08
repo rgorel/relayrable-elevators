@@ -1,7 +1,6 @@
 package com.relayr.elevators
 
-import com.relayr.elevators.models._
-import com.relayr.elevators.Controller
+import com.relayr.elevators.cli.Controller
 
 object Main extends App {
   Controller()

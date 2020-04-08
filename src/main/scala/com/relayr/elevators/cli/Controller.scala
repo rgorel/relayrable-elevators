@@ -1,10 +1,12 @@
-package com.relayr.elevators
+package com.relayr.elevators.cli
 
-import com.relayr.elevators.models._
-import scala.io.StdIn
+import com.relayr.elevators.models.{PickupRequest, State}
+import com.relayr.elevators.MaxElevators
+import com.relayr.elevators.services.Dispatcher
+
 import scala.annotation.tailrec
-import scala.util.{Try, Failure, Success}
-import java.util.regex.Pattern
+import scala.io.StdIn
+import scala.util.{Failure, Success, Try}
 
 object Controller {
   def apply(): Unit = {
@@ -20,7 +22,7 @@ object Controller {
       """
       | Here's what you can do:
       |   s
-      |     request status of all evelators
+      |     request status of all elevators
       |   d [ID] [FLOOR]
       |     request elevator with ID [ID] to go to the [FLOOR]. First space can be omitted. Examples: d 0 10, d3 1
       |   p [FLOOR] [DIRECTION]
@@ -63,7 +65,11 @@ object Controller {
       case Some(Action.Pickup(pickupRequest: PickupRequest)) =>
         repl(Dispatcher(state).pickup(pickupRequest))
 
-      case Some(Action.Step) => repl(Dispatcher(state).step())
+      case Some(Action.Step) => {
+        val nextState = Dispatcher(state).step()
+        Printer(nextState).status()
+        repl(nextState)
+      }
 
       case Some(Action.Quit) => println("Ok, all elevators destroyed! Bye bye!")
 
@@ -72,48 +78,5 @@ object Controller {
         repl(state)
       }
     }
-  }
-}
-
-
-sealed abstract class Action
-
-private object Action {
-  final case object Status extends Action
-  final case class Destination(elevatorId: Int, targetFloor: Int) extends Action
-
-  final case class Pickup(
-    pickupRequest: PickupRequest
-  ) extends Action
-
-  final case object Step extends Action
-  final case object Quit extends Action
-
-  private val DestinationPattern = """^d\s*(\d+)\s+(\d+)""".r
-  private val PickupPattern = """^p\s*(\d+)\s*(u|d)""".r
-
-  def apply(input: String): Option[Action] = input match {
-    case "s" => Some(Status)
-
-    case DestinationPattern(elevatorId: String, targetFloor: String) =>
-      Some(Destination(elevatorId.toInt, targetFloor.toInt))
-
-    case PickupPattern(pickupFloor: String, direction: String) =>
-      Some(
-        Pickup(
-          PickupRequest(
-            pickupFloor = pickupFloor.toInt,
-            direction = direction match {
-              case "u" => Direction.Up
-              case "d" => Direction.Down
-            }
-          )
-        )
-      )
-
-    case "n" => Some(Step)
-    case "q" => Some(Quit)
-
-    case _ => None
   }
 }

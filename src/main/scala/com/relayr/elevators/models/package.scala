@@ -1,8 +1,9 @@
 package com.relayr.elevators
 
+import scala.collection.immutable.Queue
+
 package object models {
-  import scala.collection.immutable.Queue
+  type PickupRequests = Queue[PickupRequest]
 
-  type PickupRequests = Map[Int, Queue[PickupRequest]]
+  val EmptyPickupRequests: PickupRequests = Queue()
 }
-
