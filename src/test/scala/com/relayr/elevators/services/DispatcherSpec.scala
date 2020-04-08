@@ -1,7 +1,6 @@
-package com.relayr.elevators
+package com.relayr.elevators.services
 
 import com.relayr.elevators.models._
-import com.relayr.elevators.services.{Dispatcher, Elevator, ElevatorNotFound}
 import org.scalatest.funspec.AnyFunSpec
 
 import scala.collection.immutable.Queue
